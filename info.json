@@ -1,4 +1,6 @@
 {
+  "name": "Something"
+  "patch-link": "https://raw.githubusercontent.com/salecto2/tmp-patches-repo/master/patches/{PATCH}/patch.json",
   "patch-list": [
     "AW-CG-1",
     "AW-ET-1",
