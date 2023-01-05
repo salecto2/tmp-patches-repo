@@ -1,0 +1,8 @@
+{
+  "aheadworks/module-onsale": {
+    "Fixes the error no such entity with id, which is generated when deleting a label with rules assigned": {
+      "source": "patches/AW-OS-1/patch-file.patch",
+      "version": "1.1.3"
+    }
+  }
+}

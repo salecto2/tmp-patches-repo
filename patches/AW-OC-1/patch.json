@@ -1,0 +1,8 @@
+{
+  "aheadworks/module-onestepcheckout": {
+    "Fixes scrolling to the top when user clicks on order overview item at checkout detail": {
+      "source": "patches/AW-OC-1/patch-file.patch",
+      "version": "2.1.1"
+    }
+  }
+}

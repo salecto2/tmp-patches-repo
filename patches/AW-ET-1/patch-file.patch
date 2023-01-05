@@ -1,0 +1,81 @@
+diff --git a/Model/Ticket/Email/VariableProcessor/Date.php b/Model/Ticket/Email/VariableProcessor/Date.php
+index b3ee42f..c6ee540 100644
+--- a/Model/Ticket/Email/VariableProcessor/Date.php
++++ b/Model/Ticket/Email/VariableProcessor/Date.php
+@@ -1,4 +1,19 @@
+ <?php
++/**
++ * Aheadworks Inc.
++ *
++ * NOTICE OF LICENSE
++ *
++ * This source file is subject to the EULA
++ * that is bundled with this package in the file LICENSE.txt.
++ * It is also available through the world-wide-web at this URL:
++ * https://aheadworks.com/end-user-license-agreement/
++ *
++ * @package    EventTickets
++ * @version    1.5.5
++ * @copyright  Copyright (c) 2021 Aheadworks Inc. (https://aheadworks.com/)
++ * @license    https://aheadworks.com/end-user-license-agreement/
++ */
+ namespace Aheadworks\EventTickets\Model\Ticket\Email\VariableProcessor;
+ 
+ use Aheadworks\EventTickets\Api\Data\TicketInterface;
+@@ -73,16 +88,8 @@ class Date implements VariableProcessorInterface
+     private function formatDate($date, $store)
+     {
+         $timezone = new \DateTimeZone($store->getConfig(Config::XML_PATH_GENERAL_LOCALE_TIMEZONE));
+-        $localeCode = $store->getConfig(Config::XML_PATH_GENERAL_LOCALE_CODE);
+         $storeDate = new \DateTime($date, new \DateTimeZone('UTC'));
+         $storeDate->setTimezone($timezone);
+-
+-        return $this->localeDate->formatDateTime(
+-            $storeDate,
+-            \IntlDateFormatter::MEDIUM,
+-            \IntlDateFormatter::MEDIUM,
+-            $localeCode,
+-            $this->localeDate->getDefaultTimezone()
+-        );
++        return $storeDate->format('d M Y H:i');
+     }
+ }
+diff --git a/Model/Ticket/Grid/TitleResolver.php b/Model/Ticket/Grid/TitleResolver.php
+index f0bdabb..999ff62 100644
+--- a/Model/Ticket/Grid/TitleResolver.php
++++ b/Model/Ticket/Grid/TitleResolver.php
+@@ -1,4 +1,19 @@
+ <?php
++/**
++ * Aheadworks Inc.
++ *
++ * NOTICE OF LICENSE
++ *
++ * This source file is subject to the EULA
++ * that is bundled with this package in the file LICENSE.txt.
++ * It is also available through the world-wide-web at this URL:
++ * https://aheadworks.com/end-user-license-agreement/
++ *
++ * @package    EventTickets
++ * @version    1.5.5
++ * @copyright  Copyright (c) 2021 Aheadworks Inc. (https://aheadworks.com/)
++ * @license    https://aheadworks.com/end-user-license-agreement/
++ */
+ namespace Aheadworks\EventTickets\Model\Ticket\Grid;
+ 
+ use Aheadworks\EventTickets\Api\Data\ProductRecurringScheduleInterface;
+@@ -76,11 +91,10 @@ class TitleResolver
+     private function getOneTimeProductDescription($eventProduct)
+     {
+         $name = $eventProduct->getName();
++        $timezone = new \DateTimeZone($this->timezone->getConfigTimezone());
+         $startDate = new \DateTime($eventProduct->getAwEtStartDate());
+-        $startDate = $this->dateTimeFormatter->formatObject(
+-            $startDate,
+-            $this->timezone->getDateTimeFormat(\IntlDateFormatter::MEDIUM)
+-        );
++        $startDate->setTimezone($timezone);
++        $startDate = $startDate->format('d M Y H:i');
+ 
+         return sprintf("%s - %s", $name, $startDate);
+     }

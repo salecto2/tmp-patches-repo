@@ -1,0 +1,12 @@
+{
+  "*": {
+    "Fixes critical exploit CVE-2022-24086. This patch is applied after MDVA-43395": {
+      "_link": "https://support.magento.com/hc/en-us/articles/4426353041293-Security-updates-available-for-Adobe-Commerce-APSB22-12-",
+      "source": "patches/MDVA-43443/patch-file.patch",
+      "after": "patches/MDVA-43395/patch-file.patch",
+      "depends": {
+        "magento/magento2-base": "2.4.3 | 2.4.3-p1"
+      }
+    }
+  }
+}

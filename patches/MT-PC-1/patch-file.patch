@@ -1,0 +1,55 @@
+diff --git a/Setup/Patch/Data/MpdfPermission.php b/Setup/Patch/Data/MpdfPermission.php
+index b2ec3d098..69cb16ceb 100644
+--- a/Setup/Patch/Data/MpdfPermission.php
++++ b/Setup/Patch/Data/MpdfPermission.php
+@@ -4,24 +4,29 @@ namespace Meetanshi\PrintCatalog\Setup\Patch\Data;
+ 
+ use Magento\Framework\Setup\ModuleDataSetupInterface;
+ use Magento\Framework\Filesystem\DirectoryList;
+-use Meetanshi\PrintCatalog\Helper\Data;
+ use Magento\Framework\Setup\Patch\DataPatchInterface;
++use Magento\Framework\App\Filesystem\DirectoryList As NewDirectoryList;
++use Magento\Framework\Filesystem;
+ 
+ class MpdfPermission implements DataPatchInterface
+ {
++    const DIR_PERMISSIONS = 0777;
++
+     protected $postFactory;
+     protected $dir;
+     protected $helperData;
+     protected $moduleDataSetup;
++    protected $filesystem;
+ 
+     public function __construct(
+         DirectoryList $dir,
+         ModuleDataSetupInterface $moduleDataSetup,
+-        Data $helperData
++        Filesystem $filesystem
+     ) {
+         $this->dir = $dir;
+         $this->moduleDataSetup = $moduleDataSetup;
+-        $this->helperData = $helperData;
++        $this->filesystem = $filesystem;
++        $this->write = $filesystem->getDirectoryWrite(NewDirectoryList::ROOT);
+     }
+     public static function getDependencies()
+     {
+@@ -41,7 +46,15 @@ class MpdfPermission implements DataPatchInterface
+     protected function mpdfPermission()
+     {
+         $modulePath = $this->dir->getRoot() . '/vendor/mpdf/mpdf/tmp';
+-        //$this->helperData->filePermission($modulePath);
+-
++        $this->filePermission($modulePath);
++    }
++    public function filePermission($directory_name)
++    {
++        $this->write->create($directory_name);
++        $this->write->changePermissions(
++            $directory_name,
++            self::DIR_PERMISSIONS
++        );
+     }
+ }
++

@@ -1,0 +1,76 @@
+diff --git a/Observer/AddToCart.php b/Observer/AddToCart.php
+index 81ce8b6..4152772 100644
+--- a/Observer/AddToCart.php
++++ b/Observer/AddToCart.php
+@@ -18,6 +18,7 @@
+ namespace Bss\FacebookPixel\Observer;
+ 
+ use Magento\Framework\Event\ObserverInterface;
++use Magento\Catalog\Helper\Data as TaxHelper;
+ 
+ class AddToCart implements ObserverInterface
+ {
+@@ -36,6 +37,11 @@ class AddToCart implements ObserverInterface
+      */
+     protected $productRepository;
+ 
++    /**
++     * @var TaxHelper
++     */
++    protected $taxHelper;
++
+     /**
+      * AddToCart constructor.
+      * @param \Bss\FacebookPixel\Model\SessionFactory $fbPixelSession
+@@ -45,11 +51,13 @@ class AddToCart implements ObserverInterface
+     public function __construct(
+         \Bss\FacebookPixel\Model\SessionFactory $fbPixelSession,
+         \Bss\FacebookPixel\Helper\Data $helper,
+-        \Magento\Catalog\Model\ProductRepository $productRepository
++        \Magento\Catalog\Model\ProductRepository $productRepository,
++        TaxHelper $taxHelper
+     ) {
+         $this->fbPixelSession = $fbPixelSession;
+         $this->helper        = $helper;
+         $this->productRepository = $productRepository;
++        $this->taxHelper = $taxHelper;
+     }
+ 
+     /**
+@@ -59,7 +67,6 @@ class AddToCart implements ObserverInterface
+      */
+     public function execute(\Magento\Framework\Event\Observer $observer)
+     {
+-
+         $items = $observer->getItems();
+         $typeConfi = \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
+         if (!$this->helper->isAddToCart() || !$items) {
+@@ -76,6 +83,10 @@ class AddToCart implements ObserverInterface
+             if ($item->getProduct()->getTypeId() == $typeConfi) {
+                 continue;
+             }
++            $itemFinalPrice = $this->taxHelper->getTaxPrice($item->getProduct(), $item->getProduct()->getFinalPrice(), false);
++            if ($this->helper->getConfig('tax/cart_display/price') != 1) {
++                $itemFinalPrice = $this->taxHelper->getTaxPrice($item->getProduct(), $item->getProduct()->getFinalPrice(), true);
++            }
+             if ($item->getParentItem()) {
+                 if ($item->getParentItem()->getProductType() == $typeConfi) {
+                     $product['contents'][] = [
+@@ -83,7 +94,7 @@ class AddToCart implements ObserverInterface
+                         'name' => $item->getName(),
+                         'quantity' => $item->getParentItem()->getQtyToAdd()
+                     ];
+-                    $product['value'] += $item->getProduct()->getFinalPrice() * $item->getParentItem()->getQtyToAdd();
++                    $product['value'] += $itemFinalPrice * $item->getParentItem()->getQtyToAdd();
+                 } else {
+                     $product['contents'][] = [
+                         'id' => $item->getSku(),
+@@ -97,7 +108,7 @@ class AddToCart implements ObserverInterface
+                     'name' => $item->getName(),
+                     'quantity' => $item->getQtyToAdd()
+                 ];
+-                $product['value'] += $item->getProduct()->getFinalPrice() * $item->getQtyToAdd();
++                $product['value'] += $itemFinalPrice * $item->getQtyToAdd();
+             }
+             $product['content_ids'][] = $this->checkBundleSku($item);
+         }

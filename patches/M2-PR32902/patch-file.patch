@@ -1,0 +1,185 @@
+--- magento/module-sales/Model/Order/Invoice/Sender/EmailSender.php
++++ magento/module-sales/Model/Order/Invoice/Sender/EmailSender.php
+@@ -104,7 +104,9 @@ public function send(
+ 
+             $transport = [
+                 'order' => $order,
++                'order_id' => $order->getId(),
+                 'invoice' => $invoice,
++                'invoice_id' => $invoice->getId(),
+                 'comment' => $comment ? $comment->getComment() : '',
+                 'billing' => $order->getBillingAddress(),
+                 'payment_html' => $this->getPaymentHtml($order),
+
+--- magento/module-sales/Test/Unit/Model/Order/Invoice/Sender/EmailSenderTest.php
++++ magento/module-sales/Test/Unit/Model/Order/Invoice/Sender/EmailSenderTest.php
+@@ -137,6 +137,7 @@ protected function setUp(): void
+         $this->storeMock->expects($this->any())
+             ->method('getStoreId')
+             ->willReturn(1);
++
+         $this->orderMock->expects($this->any())
+             ->method('getStore')
+             ->willReturn($this->storeMock);
+@@ -152,7 +153,7 @@ protected function setUp(): void
+ 
+         $this->invoiceMock = $this->getMockBuilder(\Magento\Sales\Model\Order\Invoice::class)
+             ->disableOriginalConstructor()
+-            ->setMethods(['setSendEmail', 'setEmailSent'])
++            ->setMethods(['setSendEmail', 'setEmailSent', 'getId'])
+             ->getMock();
+ 
+         $this->commentMock = $this->getMockBuilder(InvoiceCommentCreationInterface::class)
+@@ -170,6 +171,7 @@ protected function setUp(): void
+         $this->orderMock->expects($this->any())
+             ->method('getBillingAddress')
+             ->willReturn($this->addressMock);
++
+         $this->orderMock->expects($this->any())
+             ->method('getShippingAddress')
+             ->willReturn($this->addressMock);
+@@ -280,7 +282,9 @@ public function testSend($configValue, $forceSyncMode, $isComment, $emailSending
+         if (!$configValue || $forceSyncMode) {
+             $transport = [
+                 'order' => $this->orderMock,
++                'order_id' => 1,
+                 'invoice' => $this->invoiceMock,
++                'invoice_id' => 1,
+                 'comment' => $isComment ? 'Comment text' : '',
+                 'billing' => $this->addressMock,
+                 'payment_html' => 'Payment Info Block',
+@@ -315,6 +319,14 @@ public function testSend($configValue, $forceSyncMode, $isComment, $emailSending
+                 ->method('isEnabled')
+                 ->willReturn($emailSendingResult);
+ 
++            $this->orderMock->expects($this->once())
++                ->method('getId')
++                ->willReturn(1);
++
++            $this->invoiceMock->expects($this->once())
++                ->method('getId')
++                ->willReturn(1);
++
+             if ($emailSendingResult) {
+                 $this->identityContainerMock->expects($this->once())
+                     ->method('getCopyMethod')
+--- /dev/null
++++ magento/magento2-base/dev/tests/integration/testsuite/Magento/Sales/Model/Order/Invoice/Sender/EmailSenderTest.php
+@@ -0,0 +1,117 @@
++<?php
++/**
++ * Copyright © Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++declare(strict_types=1);
++
++namespace Magento\Sales\Model\Order\Invoice\Sender;
++
++use Magento\Framework\Api\SearchCriteriaBuilder;
++use Magento\Framework\ObjectManagerInterface;
++use Magento\Sales\Api\Data\InvoiceInterface;
++use Magento\Sales\Api\Data\OrderInterface;
++use Magento\Sales\Api\OrderRepositoryInterface;
++use Magento\Sales\Model\ResourceModel\Order\Invoice\CollectionFactory;
++use Magento\TestFramework\Helper\Bootstrap;
++use PHPUnit\Framework\TestCase;
++use Magento\Sales\Model\Order\Invoice\Sender\EmailSender;
++use Magento\TestFramework\Mail\Template\TransportBuilderMock;
++
++/**
++ * Test Order\Invoice\Sender\EmailSender model
++ *
++ * @see \Magento\Sales\Model\Order\Invoice\Sender\EmailSender
++ * @magentoDbIsolation enabled
++ * @magentoDataFixture Magento/Sales/_files/invoice.php
++ */
++class EmailSenderTest extends TestCase
++{
++    /**
++     * @var ObjectManagerInterface
++     */
++    private $objectManager;
++
++    /**
++     * @var EmailSender
++     */
++    private $emailSender;
++
++    /**
++     * @var CollectionFactory
++     */
++    private $invoiceCollectionFactory;
++
++    /**
++     * @var TransportBuilderMock
++     */
++    private $transportBuilder;
++
++    /**
++     * @inheritdoc
++     */
++    protected function setUp(): void
++    {
++        parent::setUp();
++
++        $this->objectManager = Bootstrap::getObjectManager();
++        $this->emailSender = $this->objectManager->get(EmailSender::class);
++        $this->invoiceCollectionFactory = $this->objectManager->get(CollectionFactory::class);
++        $this->transportBuilder = $this->objectManager->get(TransportBuilderMock::class);
++    }
++
++    /**
++     * Test that order item(s) present in email
++     *
++     * @magentoAppArea frontend
++     * @return void
++     * @throws \Exception
++     */
++    public function testOrderItemsPresentInEmail()
++    {
++        $order = $this->getOrder('100000001');
++        $invoice = $this->getInvoiceByOrder($order);
++        $this->emailSender->send($order, $invoice);
++        $message = $this->transportBuilder->getSentMessage();
++        $this->assertStringContainsString(
++            'SKU: simple',
++            $message->getBody()->getParts()[0]->getRawContent(),
++            'Expected text wasn\'t found in message.'
++        );
++    }
++
++
++    /**
++     * Get first order invoice
++     *
++     * @param OrderInterface|int $order
++     * @return InvoiceInterface
++     */
++    protected function getInvoiceByOrder($order): InvoiceInterface
++    {
++        $invoiceCollection = $this->invoiceCollectionFactory->create();
++
++        return $invoiceCollection->setOrderFilter($order)->setPageSize(1)->getFirstItem();
++    }
++
++    /**
++     * Gets order entity by increment id.
++     *
++     * @param string $incrementId
++     * @return OrderInterface
++     */
++    private function getOrder(string $incrementId): OrderInterface
++    {
++        /** @var SearchCriteriaBuilder $searchCriteriaBuilder */
++        $searchCriteriaBuilder = $this->objectManager->get(SearchCriteriaBuilder::class);
++        $searchCriteria = $searchCriteriaBuilder->addFilter('increment_id', $incrementId)
++            ->create();
++
++        /** @var OrderRepositoryInterface $repository */
++        $repository = $this->objectManager->get(OrderRepositoryInterface::class);
++        $items = $repository->getList($searchCriteria)
++            ->getItems();
++
++        return array_pop($items);
++    }
++}

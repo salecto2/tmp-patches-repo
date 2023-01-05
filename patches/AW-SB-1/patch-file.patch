@@ -1,0 +1,248 @@
+diff --git a/Model/Config.php b/Model/Config.php
+index ae41ea0ed..1e55f54ef 100644
+--- a/Model/Config.php
++++ b/Model/Config.php
+@@ -1,4 +1,5 @@
+ <?php
++
+ namespace Aheadworks\Freeshippinglabel\Model;
+ 
+ use Magento\Framework\App\Config\ScopeConfigInterface;
+@@ -15,6 +16,11 @@ class Config
+      */
+     const XML_PATH_GEO_IP_LICENSE_KEY = 'aw_fsl/geo_ip/license_key';
+ 
++    /**
++     * Configuration path to geo ip enabled flag
++     */
++    const XML_PATH_GEO_IP_ENABLED = 'aw_fsl/geo_ip/active';
++
+     /**
+      * @var ScopeConfigInterface
+      */
+@@ -41,4 +47,17 @@ class Config
+             ScopeInterface::SCOPE_STORE
+         );
+     }
++
++    /**
++     * Check if GeoIp2 enabled
++     *
++     * @return bool
++     */
++    public function isGeoIpEnabled()
++    {
++        return $this->scopeConfig->isSetFlag(
++            self::XML_PATH_GEO_IP_ENABLED,
++            ScopeInterface::SCOPE_WEBSITE
++        );
++    }
+ }
+diff --git a/Model/Label/Goal/Resolver.php b/Model/Label/Goal/Resolver.php
+index 86746d808..5cab1a125 100644
+--- a/Model/Label/Goal/Resolver.php
++++ b/Model/Label/Goal/Resolver.php
+@@ -1,8 +1,10 @@
+ <?php
++
+ namespace Aheadworks\Freeshippinglabel\Model\Label\Goal;
+ 
+ use Aheadworks\Freeshippinglabel\Model\GeoIp\Adapter\GeoIp2;
+ use Aheadworks\Freeshippinglabel\Api\Data\LabelInterface;
++use Aheadworks\Freeshippinglabel\Model\Config;
+ 
+ /**
+  * Class Resolver
+@@ -15,13 +17,21 @@ class Resolver
+      */
+     private $adapter;
+ 
++    /**
++     * @var Config
++     */
++    private $config;
++
+     /**
+      * @param GeoIp2 $adapter
++     * @param Config $config
+      */
+     public function __construct(
+-        GeoIp2 $adapter
++        GeoIp2 $adapter,
++        Config $config
+     ) {
+         $this->adapter = $adapter;
++        $this->config = $config;
+     }
+ 
+     /**
+@@ -34,6 +44,11 @@ class Resolver
+     public function resolve($label, $ip)
+     {
+         $goalValue = $this->getDefaultValue($label);
++
++        if (!$this->config->isGeoIpEnabled()) {
++            return $goalValue;
++        }
++
+         $goals = $label->getGoals();
+         if ($goals) {
+             $country = $this->adapter->getCountryCode($ip);
+diff --git a/Model/Label/Provider.php b/Model/Label/Provider.php
+index dc594e5dd..69775a220 100644
+--- a/Model/Label/Provider.php
++++ b/Model/Label/Provider.php
+@@ -1,8 +1,10 @@
+ <?php
++
+ namespace Aheadworks\Freeshippinglabel\Model\Label;
+ 
+ use Aheadworks\Freeshippinglabel\Model\GeoIp\Adapter\GeoIp2;
+ use Aheadworks\Freeshippinglabel\Api\Data\LabelInterface;
++use Aheadworks\Freeshippinglabel\Model\Config;
+ 
+ /**
+  * Class Provider
+@@ -19,13 +21,21 @@ class Provider
+      */
+     private $adapter;
+ 
++    /**
++     * @var Config
++     */
++    private $config;
++
+     /**
+      * @param GeoIp2 $adapter
++     * @param Config $config
+      */
+     public function __construct(
+-        GeoIp2 $adapter
++        GeoIp2 $adapter,
++        Config $config
+     ) {
+         $this->adapter = $adapter;
++        $this->config = $config;
+     }
+ 
+     /**
+@@ -37,6 +47,10 @@ class Provider
+      */
+     public function isCanBeShown($label, $ip)
+     {
++        if (!$this->config->isGeoIpEnabled()) {
++            return true;
++        }
++
+         $goals = $label->getGoals();
+         $country = $this->adapter->getCountryCode($ip);
+         $region = $this->adapter->getRegionCode($ip);
+diff --git a/Ui/Component/Listing/Column/Country/Options.php b/Ui/Component/Listing/Column/Country/Options.php
+index e53ef68e7..4dcb33642 100644
+--- a/Ui/Component/Listing/Column/Country/Options.php
++++ b/Ui/Component/Listing/Column/Country/Options.php
+@@ -3,6 +3,7 @@ namespace Aheadworks\Freeshippinglabel\Ui\Component\Listing\Column\Country;
+ 
+ use Magento\Directory\Model\ResourceModel\Country\Collection;
+ use Magento\Framework\Data\OptionSourceInterface;
++use Aheadworks\Freeshippinglabel\Model\Config;
+ 
+ /**
+  * Class Options
+@@ -20,12 +21,22 @@ class Options implements OptionSourceInterface
+      */
+     private $options;
+ 
++    /**
++     * @var Config
++     */
++    private $config;
++
+     /**
+      * @param Collection $countryCollection
++     * @param Config $config
+      */
+-    public function __construct(Collection $countryCollection)
++    public function __construct(
++        Collection $countryCollection,
++        Config $config
++    )
+     {
+         $this->countryCollection = $countryCollection;
++        $this->config = $config;
+     }
+ 
+     /**
+@@ -43,10 +54,13 @@ class Options implements OptionSourceInterface
+             'label' => __('All Countries'),
+             'value' => '0'
+         ];
+-        $this->options = array_merge(
+-            $this->options,
+-            $this->countryCollection->loadData()->toOptionArray(false)
+-        );
++
++        if ($this->config->isGeoIpEnabled()) {
++            $this->options = array_merge(
++                $this->options,
++                $this->countryCollection->loadData()->toOptionArray(false)
++            );
++        }
+ 
+         return $this->options;
+     }
+diff --git a/etc/adminhtml/system.xml b/etc/adminhtml/system.xml
+index 019426d89..304855177 100644
+--- a/etc/adminhtml/system.xml
++++ b/etc/adminhtml/system.xml
+@@ -10,10 +10,18 @@
+             <resource>Aheadworks_Freeshippinglabel::config_aw_fsl</resource>
+             <group id="geo_ip" translate="label" type="text comment" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                 <label>GeoIP Settings</label>
++                <field id="active" translate="label comment" sortOrder="1" type="select" showInDefault="1" showInWebsite="1" showInStore="0">
++                    <label>Enable</label>
++                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
++                </field>
+                 <field id="license_key" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                     <label>License Key</label>
++                    <validate>required-entry</validate>
++                    <depends>
++                        <field id="active">1</field>
++                    </depends>
+                 </field>
+-                <field id="download_database" translate="label button_label_not_downloaded button_label_downloaded" sortOrder="20" showInDefault="1" showInWebsite="1">
++                <field id="base_url" translate="label button_label_not_downloaded button_label_downloaded" sortOrder="20" showInDefault="1" showInWebsite="1">
+                     <label>GeoIP2 Database</label>
+                     <attribute type="button_label_not_downloaded">Download</attribute>
+                     <attribute type="button_label_downloaded">Update</attribute>
+@@ -22,8 +30,11 @@
+                     <attribute type="file_name">GeoLite2-City.mmdb</attribute>
+                     <attribute type="package_name">geoip2/geoip2</attribute>
+                     <frontend_model>Aheadworks\Freeshippinglabel\Block\Adminhtml\System\Config\GeoIp\DownloadDatabase</frontend_model>
++                    <depends>
++                        <field id="active">1</field>
++                    </depends>
+                 </field>
+             </group>
+         </section>
+     </system>
+-</config>
+\ No newline at end of file
++</config>
+diff --git a/view/adminhtml/ui_component/aw_fslabel_label_form.xml b/view/adminhtml/ui_component/aw_fslabel_label_form.xml
+index 1473fe308..6043c25fe 100644
+--- a/view/adminhtml/ui_component/aw_fslabel_label_form.xml
++++ b/view/adminhtml/ui_component/aw_fslabel_label_form.xml
+@@ -125,10 +125,11 @@
+                             <item name="config" xsi:type="array">
+                                 <item name="dataType" xsi:type="string">text</item>
+                                 <item name="label" xsi:type="string" translate="true">Country</item>
+-                                <item name="formElement" xsi:type="string">select</item>
++                                <item name="formElement" xsi:type="string">text</item>
+                                 <item name="component" xsi:type="string">Magento_Ui/js/form/element/select</item>
+                                 <item name="template" xsi:type="string">ui/form/field</item>
+                                 <item name="elementTmpl" xsi:type="string">ui/form/element/select</item>
++                                <item name="notice" xsi:type="string" translate="true">Warning! To display the full list of countries, the GeoIP option must be enabled in the extension settings.</item>
+                                 <item name="source" xsi:type="string">space</item>
+                                 <item name="sortOrder" xsi:type="number">10</item>
+                                 <item name="dataScope" xsi:type="string">country</item>

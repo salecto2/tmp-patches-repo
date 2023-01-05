@@ -1,0 +1,33 @@
+--- mailchimp/mc-magento2/etc/csp_whitelist.xml
++++ mailchimp/mc-magento2/etc/csp_whitelist.xml
+@@ -4,11 +4,20 @@
+         <policy id="img-src">
+             <values>
+                 <value id="mailchiimp_logo" type="host">ebizmarts-website.s3.amazonaws.com</value>
++                <value id="mailchimp_images" type="host">downloads.mailchimp.com</value>
++                <value id="mailchimp_images_gallery" type="host">gallery.mailchimp.com</value>
+             </values>
+         </policy>
+         <policy id="script-src">
+             <values>
+-                <value id="chimpstatic" type="host">*.chimpstatic.com</value>
++                <value id="chimpstatic" type="host">chimpstatic.com</value>
++                <value id="mailchimp-js" type="host">downloads.mailchimp.com</value>
++                <value id="list-management" type="host">*.list-manage.com</value>
++            </values>
++        </policy>
++        <policy id='style-src'>
++            <values>
++                <value id="mailchimp-styles" type="host">downloads.mailchimp.com</value>
+             </values>
+         </policy>
+     </policies>
+--- mailchimp/mc-magento2/view/frontend/templates/mailchimpjs.phtml
++++ mailchimp/mc-magento2/view/frontend/templates/mailchimpjs.phtml
+@@ -4,5 +4,5 @@
+  */
+ $url = $block->getJsUrl();
+ $render = $block->getRender();
+-echo $render->renderTag('script',['type'=>'text/javascript','src'=>$url],'',false);
++echo $render->renderTag('script',['type'=>'text/javascript','src'=>$escaper->escapeUrl($url),'defer'=>'defer'],"\n",true);
+ ?>

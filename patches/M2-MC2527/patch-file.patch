@@ -1,0 +1,11 @@
+--- magento/module-product-video/view/frontend/web/js/fotorama-add-video-events.js
++++ magento/module-product-video/view/frontend/web/js/fotorama-add-video-events.js
+@@ -457,7 +457,7 @@ define([
+                 scriptTag = document.getElementsByTagName('script')[0];
+ 
+             element.async = true;
+-            element.src = 'https://f.vimeocdn.com/js/froogaloop2.min.js';
++            element.src = 'https://player.vimeo.com/api/player.js';
+ 
+             /**
+              * Vimeo js framework on load callback.

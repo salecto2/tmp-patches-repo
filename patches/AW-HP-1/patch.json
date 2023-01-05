@@ -1,0 +1,8 @@
+{
+    "aheadworks/module-hide-price": {
+        "Fixes the error where special characters, specially danish characters UTF-8 is broken": {
+            "source": "patches/AW-HP-1/patch-file.patch",
+            "version": "1.0.1"
+        }
+    }
+}

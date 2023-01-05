@@ -1,0 +1,8 @@
+{
+    "aheadworks/module-customer-group-catalog-permissions": {
+        "Fixes the error where products not assigned to a category breaks the search results": {
+            "source": "patches/AW-CG-1/patch-file.patch",
+            "version": "1.0.8 | 1.0.7"
+        }
+    }
+}

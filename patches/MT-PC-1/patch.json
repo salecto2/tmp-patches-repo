@@ -1,0 +1,8 @@
+{
+    "meetanshi/magento-2-pdf-catalog": {
+        "fixes the module installation breaking the shop due to missing area code error": {
+            "source": "patches/MT-PC-1/patch-file.patch",
+            "version": "1.0.2"
+        }
+    }
+}

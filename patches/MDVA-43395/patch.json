@@ -1,0 +1,11 @@
+{
+  "*": {
+    "Fixes critical exploit CVE-2022-24086 which is an improper input validation issue that can lead to arbitrary code execution": {
+      "_link": "https://support.magento.com/hc/en-us/articles/4426353041293-Security-updates-available-for-Adobe-Commerce-APSB22-12-",
+      "source": "patches/MDVA-43395/patch-file.patch",
+      "depends": {
+        "magento/magento2-base": "2.4.3 | 2.4.3-p1"
+      }
+    }
+  }
+}

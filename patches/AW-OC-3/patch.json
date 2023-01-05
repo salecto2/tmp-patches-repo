@@ -1,0 +1,8 @@
+{
+    "aheadworks/module-onestepcheckout": {
+        "Fixes something went wrong with your request error that happens on checkout.": {
+            "source": "patches/AW-OC-3/patch-file.patch",
+            "version": "2.2.0"
+        }
+    }
+}

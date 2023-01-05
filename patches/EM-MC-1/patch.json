@@ -1,0 +1,9 @@
+{
+  "mailchimp/mc-magento2": {
+    "Fixes popup not working and javascript error due to body class being removed": {
+      "_link": "https://github.com/mailchimp/mc-magento2/issues/1266",
+      "source": "patches/EM-MC-1/patch-file.patch",
+      "version": "103.4.43"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+    "aheadworks/module-event-tickets": {
+        "Fixes timezone issue between backend settings and email ticket a customer receives": {
+            "source": "patches/AW-ET-1/patch-file.patch",
+            "version": "1.5.8"
+        }
+    }
+}

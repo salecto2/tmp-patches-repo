@@ -1,0 +1,11 @@
+{
+    "*": {
+        "Fixes unable to upload the same Vimeo video twice": {
+            "_link": "https://github.com/magento/magento2/issues/33390",
+            "source": "patches/M2-IS33390/patch-file.patch",
+            "depends": {
+                "magento/magento2-base": "2.4.3-p1"
+            }
+        }
+    }
+}

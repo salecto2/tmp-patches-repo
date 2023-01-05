@@ -1,0 +1,37 @@
+--- view/frontend/requirejs-config.js
++++ view/frontend/requirejs-config.js
+@@ -77,6 +77,9 @@ var config = {
+             },
+             'Magento_InventoryInStorePickupFrontend/js/model/pickup-locations-service': {
+                 'Aheadworks_OneStepCheckout/js/model/inventory/instore-pickup/pickup-locations-service-mixin': true
++            },
++            'mage/collapsible': {
++                'Aheadworks_OneStepCheckout/js/widget/collapsible-mixin': true
+             }
+         }
+     }
+--- /dev/null
++++ view/frontend/web/js/widget/collapsible-mixin.js
+@@ -0,0 +1,22 @@
++define([
++    'jquery'
++], function ($) {
++    'use strict';
++
++    return function (widget) {
++        $.widget('mage.collapsible', widget, {
++            awProductOptionsName: 'aw-sidebar-product-options',
++
++            /**
++             * @inheritdoc
++             * */
++            _scrollToTopIfNotVisible: function () {
++                if (this.content[0].className === this.awProductOptionsName) {
++                    this._super();
++                }
++            }
++        });
++
++        return $.mage.collapsible;
++    }
++});

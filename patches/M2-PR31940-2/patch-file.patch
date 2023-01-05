@@ -1,0 +1,51 @@
+--- magento/module-customer/view/frontend/web/js/customer-data.js
++++ magento/module-customer/view/frontend/web/js/customer-data.js
+@@ -17,7 +17,9 @@ define([
+ ], function ($, _, ko, sectionConfig, url) {
+     'use strict';
+
+-    var options = {},
++    var options = {
++            cookieLifeTime: 86400 //1 day by default
++        },
+         storage,
+         storageInvalidation,
+         invalidateCacheBySessionTimeOut,
+@@ -32,6 +32,21 @@ define([
+     url.setBaseUrl(window.BASE_URL);
+     options.sectionLoadUrl = url.build('customer/section/load');
+
++    /**
++     * Storage initialization
++     */
++    function initStorage() {
++        $.cookieStorage.setConf({
++            path: '/',
++            expires: new Date(Date.now() + parseInt(options.cookieLifeTime, 10) * 1000),
++            samesite: 'lax'
++        });
++        storage = $.initNamespaceStorage('mage-cache-storage').localStorage;
++        storageInvalidation = $.initNamespaceStorage('mage-cache-storage-section-invalidation').localStorage;
++    }
++
++    // Initialize storage with default parameters to prevent JS errors while component still not initialized
++    initStorage();
+     /**
+      * @param {Object} invalidateOptions
+      */
+@@ -219,14 +234,7 @@ define([
+         /**
+          * Storage init
+          */
+-        initStorage: function () {
+-            $.cookieStorage.setConf({
+-                path: '/',
+-                expires: new Date(Date.now() + parseInt(options.cookieLifeTime, 10) * 1000)
+-            });
+-            storage = $.initNamespaceStorage('mage-cache-storage').localStorage;
+-            storageInvalidation = $.initNamespaceStorage('mage-cache-storage-section-invalidation').localStorage;
+-        },
++        initStorage: initStorage,
+
+         /**
+          * Retrieve the list of sections that has expired since last page reload.

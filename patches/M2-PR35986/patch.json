@@ -1,0 +1,11 @@
+{
+  "*": {
+    "Fixes - Filters doen't work properly in catalog category page if Display Out of Stock Products is set to Yes": {
+      "_link": "https://github.com/magento/magento2/pull/35986",
+      "source": "patches/M2-PR35986/patch-file.patch",
+      "depends": {
+        "magento/magento2-base": "2.4.5 | 2.4.5-p1"
+      }
+    }
+  }
+}

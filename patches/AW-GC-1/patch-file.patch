@@ -1,0 +1,175 @@
+diff --git a/Model/Import/AbstractImport.php b/Model/Import/AbstractImport.php
+index a91c9288d..390bc4273 100644
+--- a/Model/Import/AbstractImport.php
++++ b/Model/Import/AbstractImport.php
+@@ -1,4 +1,19 @@
+ <?php
++/**
++ * Aheadworks Inc.
++ *
++ * NOTICE OF LICENSE
++ *
++ * This source file is subject to the EULA
++ * that is bundled with this package in the file LICENSE.txt.
++ * It is also available through the world-wide-web at this URL:
++ * https://aheadworks.com/end-user-license-agreement/
++ *
++ * @package    Giftcard
++ * @version    1.4.6
++ * @copyright  Copyright (c) 2021 Aheadworks Inc. (https://aheadworks.com/)
++ * @license    https://aheadworks.com/end-user-license-agreement/
++ */
+ namespace Aheadworks\Giftcard\Model\Import;
+ 
+ use Aheadworks\Giftcard\Model\Import\Exception\ImportValidatorException;
+@@ -7,6 +22,7 @@ use Magento\Framework\App\RequestInterface;
+ use Magento\Ui\Component\Filters;
+ use Magento\Ui\Component\Filters\Type\Select;
+ use Magento\Ui\Component\MassAction\Filter;
++use Magento\Framework\App\ProductMetadataInterface;
+ 
+ /**
+  * Class AbstractImport
+@@ -63,19 +79,27 @@ abstract class AbstractImport
+      */
+     private $request;
+ 
++    /**
++     * @var ProductMetadataInterface
++     */
++    private $productMetadata;
++
+     /**
+      * @param DataObjectHelper $dataObjectHelper
+      * @param Filter $filter
+      * @param RequestInterface $request
++     * @param ProductMetadataInterface $productMetadata
+      */
+     public function __construct(
+         DataObjectHelper $dataObjectHelper,
+         Filter $filter,
+-        RequestInterface $request
++        RequestInterface $request,
++        ProductMetadataInterface $productMetadata
+     ) {
+         $this->dataObjectHelper = $dataObjectHelper;
+         $this->filter = $filter;
+         $this->request = $request;
++        $this->productMetadata = $productMetadata;
+     }
+ 
+     /**
+@@ -166,8 +190,15 @@ abstract class AbstractImport
+      */
+     protected function saveMessagesToLog()
+     {
+-        $writer = new \Zend\Log\Writer\Stream(BP . '/' . $this->getPathToLogFile());
+-        $logger = new \Zend\Log\Logger();
++        $magentoVersion = $this->productMetadata->getVersion();
++        if(version_compare($magentoVersion, '2.4.3', '>=')){
++            $writer = new \Zend_Log_Writer_Stream(BP . '/' . $this->getPathToLogFile());
++            $logger = new \Zend_Log();
++        }
++        else{
++            $writer = new \Zend\Log\Writer\Stream(BP . '/' . $this->getPathToLogFile());
++            $logger = new \Zend\Log\Logger();
++        }
+         $logger->addWriter($writer);
+ 
+         $messages = $this->getMessages();
+@@ -386,3 +417,4 @@ abstract class AbstractImport
+         return 'var/log/' . $this->logFileName . '.log';
+     }
+ }
++
+diff --git a/Model/Import/PoolCode.php b/Model/Import/PoolCode.php
+index 03ae91d72..7cade629e 100644
+--- a/Model/Import/PoolCode.php
++++ b/Model/Import/PoolCode.php
+@@ -1,4 +1,19 @@
+ <?php
++/**
++ * Aheadworks Inc.
++ *
++ * NOTICE OF LICENSE
++ *
++ * This source file is subject to the EULA
++ * that is bundled with this package in the file LICENSE.txt.
++ * It is also available through the world-wide-web at this URL:
++ * https://aheadworks.com/end-user-license-agreement/
++ *
++ * @package    Giftcard
++ * @version    1.4.6
++ * @copyright  Copyright (c) 2021 Aheadworks Inc. (https://aheadworks.com/)
++ * @license    https://aheadworks.com/end-user-license-agreement/
++ */
+ namespace Aheadworks\Giftcard\Model\Import;
+ 
+ use Magento\Framework\Api\DataObjectHelper;
+@@ -7,6 +22,7 @@ use Aheadworks\Giftcard\Api\Data\Pool\CodeInterfaceFactory as PoolCodeInterfaceF
+ use Aheadworks\Giftcard\Model\ResourceModel\Validator\GiftcardIsUnique;
+ use Magento\Framework\App\RequestInterface;
+ use Magento\Ui\Component\MassAction\Filter;
++use Magento\Framework\App\ProductMetadataInterface;
+ 
+ /**
+  * Class PoolCode
+@@ -39,6 +55,7 @@ class PoolCode extends AbstractImport
+      * @param DataObjectHelper $dataObjectHelper
+      * @param Filter $filter
+      * @param RequestInterface $request
++     * @param ProductMetadataInterface $productMetadata
+      * @param GiftcardIsUnique $giftcardIsUniqueValidator
+      * @param PoolCodeInterfaceFactory $poolCodeFactory
+      */
+@@ -46,10 +63,11 @@ class PoolCode extends AbstractImport
+         DataObjectHelper $dataObjectHelper,
+         Filter $filter,
+         RequestInterface $request,
++        ProductMetadataInterface $productMetadata,
+         GiftcardIsUnique $giftcardIsUniqueValidator,
+         PoolCodeInterfaceFactory $poolCodeFactory
+     ) {
+-        parent::__construct($dataObjectHelper, $filter, $request);
++        parent::__construct($dataObjectHelper, $filter, $request, $productMetadata);
+         $this->giftcardIsUniqueValidator = $giftcardIsUniqueValidator;
+         $this->poolCodeFactory = $poolCodeFactory;
+     }
+@@ -92,3 +110,4 @@ class PoolCode extends AbstractImport
+         ];
+     }
+ }
++
+diff --git a/vendor/aheadworks/module-giftcard/Model/Import/GiftcardCode.php b/vendor/aheadworks/module-giftcard/Model/Import/GiftcardCode.php
+index 6186a42b1..c35b9c3e2 100644
+--- a/Model/Import/GiftcardCode.php
++++ b/Model/Import/GiftcardCode.php
+@@ -14,6 +14,7 @@ use Magento\Ui\Component\MassAction\Filter;
+ use Magento\Framework\Stdlib\DateTime as StdlibDateTime;
+ use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+ use Magento\Framework\Api\SearchCriteriaBuilder;
++use Magento\Framework\App\ProductMetadataInterface;
+ 
+ /**
+  * Class GiftcardCode
+@@ -70,6 +71,7 @@ class GiftcardCode extends AbstractImport
+      * @param GiftcardInterfaceFactory $giftcardFactory
+      * @param TimezoneInterface $localeDate
+      * @param OrderRepositoryInterface $orderRepository
++     * @param ProductMetadataInterface $productMetadata
+      * @param ProductRepositoryInterface $productRepository
+      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+      */
+@@ -81,10 +83,11 @@ class GiftcardCode extends AbstractImport
+         GiftcardInterfaceFactory $giftcardFactory,
+         TimezoneInterface $localeDate,
+         OrderRepositoryInterface $orderRepository,
++        ProductMetadataInterface $productMetadata,
+         ProductRepositoryInterface $productRepository,
+         SearchCriteriaBuilder $searchCriteriaBuilder
+     ) {
+-        parent::__construct($dataObjectHelper, $filter, $request);
++        parent::__construct($dataObjectHelper, $filter, $request, $productMetadata);
+         $this->giftcardIsUniqueValidator = $giftcardIsUniqueValidator;
+         $this->giftcardFactory = $giftcardFactory;
+         $this->localeDate = $localeDate;
