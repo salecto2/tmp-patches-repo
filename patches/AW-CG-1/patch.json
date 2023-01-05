@@ -16,7 +16,7 @@
     "patch":{
         "aheadworks/module-customer-group-catalog-permissions": {
             "AW-CG-1 for version 1.0.8 | 1.0.7": {
-                "source": "/patch-file.patch",
+                "source": "patch-file.patch",
                 "version": "1.0.8 | 1.0.7"
             },
             "AW-CG-1 for version 1.0.8 | 1.0.7": {
