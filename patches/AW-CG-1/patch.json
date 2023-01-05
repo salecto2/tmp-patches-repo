@@ -16,21 +16,21 @@
     "patch":{
         "aheadworks/module-customer-group-catalog-permissions": {
             "AW-CG-1 for version 1.0.8 | 1.0.7": {
-                "source": "patches/AW-CG-1/patch-file.patch",
+                "source": "/patch-file.patch",
                 "version": "1.0.8 | 1.0.7"
             },
             "AW-CG-1 for version 1.0.8 | 1.0.7": {
-                "source": "patches/AW-CG-1/patch-file.patch",
+                "source": "patch-file.patch",
                 "version": "1.0.9 "
             }
         }
         "magento2/module-something": {
             "AW-CG-1 for version 2.4.5-p1": {
-                "source": "patches/AW-CG-1/patch-file.patch",
+                "source": "patch-file.patch",
                 "version": "2.4.5-p1"
             },
             "AW-CG-1 for version 2.4.3-p1": {
-                "source": "patches/AW-CG-1/patch-file.patch",
+                "source": "patch-file.patch",
                 "version": "2.4.3-p1"
             }
         }
