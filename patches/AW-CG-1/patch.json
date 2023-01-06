@@ -19,9 +19,9 @@
                 "source": "patch-file.patch",
                 "version": "1.0.8 | 1.0.7"
             },
-            "AW-CG-1 for version 1.0.8 | 1.0.7": {
+            "AW-CG-1 for version 1.0.9": {
                 "source": "patch-file.patch",
-                "version": "1.0.9 "
+                "version": "1.0.9"
             }
         }
         "magento2/module-something": {
