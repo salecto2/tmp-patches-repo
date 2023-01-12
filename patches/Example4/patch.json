@@ -1,7 +1,7 @@
 {
     "_meta": {
         "_name": "Example4",
-        "_description": "Module patch for differnt versions of the module",
+        "_description": "Module patch for different versions of the module",
         "_link": "https://github.com/magento/magento2/pull/35986",
         "_tags": [
             "test",
