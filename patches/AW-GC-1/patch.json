@@ -1,8 +1,0 @@
-{
-  "aheadworks/module-giftcard": {
-    "Fixes the error where gift code import gives an error page": {
-      "source": "patches/AW-GC-1/patch-file.patch",
-      "version": "1.4.6"
-    }
-  }
-}

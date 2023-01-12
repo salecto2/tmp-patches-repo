@@ -1,0 +1,27 @@
+{
+    "_meta": {
+        "_name": "Example4",
+        "_description": "Module patch for differnt versions of the module",
+        "_link": "https://github.com/magento/magento2/pull/35986",
+        "_tags": [
+            "test",
+            "test2",
+            "test3",
+            "test4"
+        ],
+        "_errors": [
+            "error 1",
+            "error2"
+        ]
+    },
+    "aheadworks/module-onestepcheckout": {
+        "Example 4": {
+            "source": "http://127.0.0.1/tmp-patches-repo/patches/Example4/patch-file.patch",
+            "version": "2.2.0"
+        },
+        "Example 4 - 2.2.1": {
+            "source": "http://127.0.0.1/tmp-patches-repo/patches/Example4/patch-file-2.patch",
+            "version": "2.2.1"
+        }
+    }
+}

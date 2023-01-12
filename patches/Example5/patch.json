@@ -1,0 +1,26 @@
+{
+    "_meta": {
+        "_name": "Example4",
+        "_description": "Patches that need to be applied after or before another patch",
+        "_link": "https://support.magento.com/hc/en-us/articles/4426353041293-Security-updates-available-for-Adobe-Commerce-APSB22-12-",
+        "_tags": [
+            "test",
+            "test2",
+            "test3",
+            "test4"
+        ],
+        "_errors": [
+            "error 1",
+            "error2"
+        ]
+    },
+    "*": {
+        "Example1": {
+            "source": "http://127.0.0.1/tmp-patches-repo/patches/Example5/patch-file.patch",
+            "after": "http://127.0.0.1/tmp-patches-repo/patches/Example3/patch-file.patch",
+            "depends": {
+                "magento/magento2-base": "2.4.5 | 2.4.5-p1"
+            }
+        }
+    }
+}

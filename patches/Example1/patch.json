@@ -1,0 +1,25 @@
+{
+    "_meta": {
+        "_name": "Example1",
+        "_description": "Single Magento patch",
+        "_link": "https://github.com/magento/magento2/pull/35986",
+        "_tags": [
+            "test",
+            "test2",
+            "test3",
+            "test4"
+        ],
+        "_errors": [
+            "error 1",
+            "error2"
+        ]
+    },
+    "*": {
+        "Example1": {
+            "source": "http://127.0.0.1/tmp-patches-repo/patches/Example1/patch-file.patch",
+            "depends": {
+                "magento/magento2-base": "2.4.5 | 2.4.5-p1"
+            }
+        }
+    }
+}

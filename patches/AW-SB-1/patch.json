@@ -1,8 +1,0 @@
-{
-  "aheadworks/module-freeshippinglabel": {
-    "Fixes error where activating free shipping bar breaks the site": {
-      "source": "patches/AW-SB-1/patch-file.patch",
-      "version": "1.2.1"
-    }
-  }
-}

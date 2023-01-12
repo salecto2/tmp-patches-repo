@@ -1,8 +1,0 @@
-{
-    "bsscommerce/facebook-pixel": {
-        "Fixes AddToCart event to push price including taxes": {
-            "source": "patches/BC-FB-1/patch-file.patch",
-            "version": "1.0.3"
-        }
-    }
-}

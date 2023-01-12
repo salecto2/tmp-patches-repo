@@ -1,31 +1,13 @@
 {
-  "name": "Something"
-  "patch-link": "https://raw.githubusercontent.com/salecto2/tmp-patches-repo/master/patches/{PATCH}/patch.json",
+  "name": "Salecto Patches",
+  "local-directory": "tmp-patches-repo",
+  "patch-link": "https://raw.githubusercontent.com/salecto2/tmp-patches-repo/master/patches/{{PATCH}}/patch.json",
   "patch-list": [
-    "AW-CG-1",
-    "AW-ET-1",
-    "AW-GC-1",
-    "AW-HP-1",
-    "AW-OC-1",
-    "AW-OC-3",
-    "AW-OS-1",
-    "AW-PD-1",
-    "AW-SB-1",
-    "BC-FB-1",
-    "EM-MC-1",
-    "M2-IS33390",
-    "M2-IS33673",
-    "M2-MC2527",
-    "M2-MC40374",
-    "M2-PR31940",
-    "M2-PR31940-2",
-    "M2-PR32009",
-    "M2-PR32902",
-    "M2-PR33021",
-    "M2-PR34156",
-    "M2-PR35986",
-    "MDVA-43395",
-    "MDVA-43443",
-    "MT-PC-1"
+    "Example1",
+    "Example2",
+    "Example3",
+    "Example4",
+    "Example5",
+    "Example5"
   ]
 }
